@@ -3,114 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>分红记账本·强制云同步版</title>
+<title>分红记账本·Gitee云同步版</title>
 <script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
 <style>
 * { margin: 0; padding: 0; box-sizing: border-box; }
 body { font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif; background: #f5f5f5; color: #333; }
-
-#lockScreen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.85); z-index: 9999; display: flex; align-items: center; justify-content: center; }
+#lockScreen { position: fixed; inset: 0; background: rgba(0,0,0,.85); z-index: 9999; display: flex; align-items: center; justify-content: center; }
 #lockScreen .box { background: #fff; padding: 30px; border-radius: 12px; width: 90%; max-width: 320px; text-align: center; }
 #lockScreen input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
 #lockScreen button { width: 100%; padding: 12px; background: #4a90d9; color: #fff; border: none; border-radius: 8px; font-size: 16px; cursor: pointer; margin-top: 10px; }
 #lockScreen .hint { font-size: 13px; color: #666; margin-top: 12px; }
 #lockScreen .hint a { color: #4a90d9; text-decoration: none; }
-
 .nav { display: flex; flex-wrap: wrap; background: #fff; border-bottom: 1px solid #eee; position: sticky; top: 0; z-index: 100; }
 .nav button { flex: 1; min-width: 60px; padding: 10px 2px; border: none; background: none; font-size: 12px; cursor: pointer; border-bottom: 2px solid transparent; }
 .nav button.active { color: #4a90d9; border-bottom-color: #4a90d9; font-weight: bold; }
-
 .page { display: none; padding: 15px; }
 .page.active { display: block; }
-
-.card { background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.card { background: #fff; border-radius: 10px; padding: 15px; margin-bottom: 15px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .card h3 { margin-bottom: 12px; font-size: 16px; }
-
 input, select, textarea { width: 100%; padding: 10px; margin: 6px 0; border: 1px solid #ddd; border-radius: 8px; font-size: 15px; box-sizing: border-box; }
 button.btn { padding: 10px 16px; background: #4a90d9; color: #fff; border: none; border-radius: 8px; font-size: 15px; cursor: pointer; margin: 4px 2px; }
-button.btn-red { background: #e74c3c; }
-button.btn-green { background: #27ae60; }
-button.btn-orange { background: #f39c12; }
+button.btn-red { background: #e74c3c; } button.btn-green { background: #27ae60; } button.btn-orange { background: #f39c12; }
 .btn-sm { padding: 5px 10px; font-size: 13px; border-radius: 6px; border: none; cursor: pointer; margin: 2px; }
 .btn-del { background: #e74c3c; color: #fff; }
-
 .quick-amt { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
 .quick-amt button { flex: 1; min-width: 45px; padding: 8px 2px; border: 1px solid #4a90d9; background: #fff; color: #4a90d9; border-radius: 6px; font-size: 13px; cursor: pointer; }
-
 .summary { display: flex; gap: 10px; flex-wrap: wrap; }
-.summary .item { flex: 1; min-width: 80px; background: #fff; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+.summary .item { flex: 1; min-width: 80px; background: #fff; border-radius: 10px; padding: 12px; text-align: center; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
 .summary .item .label { font-size: 12px; color: #999; }
 .summary .item .value { font-size: 18px; font-weight: bold; margin-top: 4px; }
-.summary .item .value.green { color: #27ae60; }
-.summary .item .value.red { color: #e74c3c; }
-.summary .item .value.blue { color: #4a90d9; }
-
+.summary .item .value.green { color: #27ae60; } .summary .item .value.red { color: #e74c3c; } .summary .item .value.blue { color: #4a90d9; }
 table { width: 100%; border-collapse: collapse; font-size: 13px; }
 th, td { padding: 8px 6px; text-align: left; border-bottom: 1px solid #eee; }
 th { background: #f8f9fa; font-weight: 600; position: sticky; top: 0; }
 tr:hover { background: #f8f9fa; }
-
 .badge { display: inline-block; padding: 2px 8px; border-radius: 10px; font-size: 12px; }
-.badge-red { background: #fde8e8; color: #e74c3c; }
-.badge-green { background: #d4f8e8; color: #27ae60; }
-.badge-blue { background: #e8f0fe; color: #4a90d9; }
-.badge-orange { background: #fef3e2; color: #f39c12; }
-.badge-purple { background: #f3e8fd; color: #8e44ad; }
-
-.modal-mask { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 200; align-items: center; justify-content: center; }
+.badge-red { background: #fde8e8; color: #e74c3c; } .badge-green { background: #d4f8e8; color: #27ae60; }
+.badge-blue { background: #e8f0fe; color: #4a90d9; } .badge-orange { background: #fef3e2; color: #f39c12; } .badge-purple { background: #f3e8fd; color: #8e44ad; }
+.modal-mask { display: none; position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200; align-items: center; justify-content: center; }
 .modal-mask.show { display: flex; }
 .modal { background: #fff; border-radius: 12px; padding: 20px; width: 92%; max-width: 400px; max-height: 80vh; overflow-y: auto; }
 .modal h3 { margin-bottom: 15px; }
-
-.toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.8); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 3000; display: none; }
+.toast { position: fixed; top: 60px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,.8); color: #fff; padding: 10px 20px; border-radius: 8px; font-size: 14px; z-index: 3000; display: none; }
 .toast.show { display: block; }
-
 .syncbar { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; background: #eef4ff; border-radius: 8px; padding: 8px 12px; margin-bottom: 12px; font-size: 13px; }
 .syncbar .dot { width: 8px; height: 8px; border-radius: 50%; background: #ccc; display: inline-block; }
-.syncbar .dot.on { background: #27ae60; }
-.syncbar .dot.off { background: #e74c3c; }
-.syncbar .dot.saving { background: #f39c12; animation: blink 0.8s infinite; }
-@keyframes blink { 50% { opacity: 0.3; } }
-
-#setupOverlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fff; z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
+.syncbar .dot.on { background: #27ae60; } .syncbar .dot.off { background: #e74c3c; } .syncbar .dot.saving { background: #f39c12; animation: blink .8s infinite; }
+@keyframes blink { 50% { opacity: .3; } }
+#setupOverlay { position: fixed; inset: 0; background: #fff; z-index: 5000; display: flex; align-items: center; justify-content: center; padding: 20px; }
 #setupOverlay .setup-box { width: 100%; max-width: 400px; }
 #setupOverlay h2 { margin-bottom: 15px; text-align: center; }
 #setupOverlay .step { background: #f8f9fa; border-radius: 8px; padding: 12px; margin: 10px 0; font-size: 13px; line-height: 1.8; }
 #setupOverlay code { background: #e8f0fe; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
-
-@media (max-width: 480px) {
-  .nav button { font-size: 11px; }
-  .summary .item .value { font-size: 15px; }
-  table { font-size: 12px; }
-  th, td { padding: 6px 3px; }
-}
+@media (max-width: 480px) { .nav button { font-size: 11px; } .summary .item .value { font-size: 15px; } table { font-size: 12px; } th, td { padding: 6px 3px; } }
 </style>
 </head>
 <body>
 
-<!-- 首次配置云同步遮罩 -->
 <div id="setupOverlay">
   <div class="setup-box">
-    <h2>☁️ 首次使用：配置云端</h2>
-    <p style="text-align:center;color:#666;margin-bottom:10px;">数据只存云端，换手机不丢。配一次就行。</p>
-    <div class="step">
-      <b>第1步：建存储</b><br>
-      打开 <code>gist.github.com</code> 登录 → 点「+」→ New gist → 文件名 <code>ledger.json</code> → 内容填 <code>{"flows":[],"members":[],"shops":[],"payments":[]}</code> → 选 <b>Secret</b> → 创建
-    </div>
-    <div class="step">
-      <b>第2步：拿 Gist ID</b><br>
-      创建后看地址栏，<code>gist.github.com/你/</code> 后面那串就是
-    </div>
-    <div class="step">
-      <b>第3步：建 Token</b><br>
-      打开 <code>github.com/settings/tokens?type=beta</code> → Generate new token → 命名 → Repository access 选那个 gist → Permissions 里 <b>Contents 选 Read and Write</b> → 生成后复制 <code>ghp_</code> 开头字符串
-    </div>
-    <label>Gist ID</label>
-    <input type="text" id="setupGist" placeholder="粘贴 Gist ID">
-    <label>GitHub Token</label>
-    <input type="password" id="setupToken" placeholder="ghp_ 开头">
+    <h2>☁️ 配置云端（Gitee·国内）</h2>
+    <p style="text-align:center;color:#666;margin-bottom:10px;">数据存 Gitee 私有仓库，国内秒开，换手机不丢</p>
+    <div class="step"><b>第1步</b> gitee.com 新建<code>私有</code>仓库，新建文件 <code>ledger.json</code>，内容 <code>{"flows":[],"members":[],"shops":[],"payments":[]}</code></div>
+    <div class="step"><b>第2步</b> 头像→设置→私人令牌→生成，勾 <code>projects</code>→复制令牌</div>
+    <label>Gitee 用户名</label><input type="text" id="setupOwner" placeholder="ysmccbdd">
+    <label>仓库名</label><input type="text" id="setupRepo" placeholder="ysmccbdd">
+    <label>Gitee 私人令牌</label><input type="password" id="setupToken" placeholder="粘贴令牌">
     <button class="btn btn-green" style="width:100%;margin-top:10px;" onclick="finishSetup()">✅ 保存并连接</button>
-    <p style="font-size:12px;color:#999;text-align:center;margin-top:10px;">配好后数据自动存云端，本地不丢</p>
   </div>
 </div>
 
@@ -123,9 +82,7 @@ tr:hover { background: #f8f9fa; }
     <p class="hint"><a href="#" id="forgotLink">忘记密码？</a></p>
   </div>
 </div>
-
 <div class="toast" id="toast"></div>
-
 <div class="nav" style="display:none;" id="mainNav">
   <button class="active" onclick="showPage('flow',this)">📒 流水</button>
   <button onclick="showPage('daily',this)">📊 每日</button>
@@ -136,11 +93,8 @@ tr:hover { background: #f8f9fa; }
   <button onclick="showPage('settings',this)">⚙️ 设置</button>
 </div>
 
-<!-- 流水页 -->
 <div id="flow" class="page">
-  <div class="syncbar">
-    <span class="dot on" id="syncDot"></span>
-    <span id="syncText">已连接云端</span>
+  <div class="syncbar"><span class="dot on" id="syncDot"></span><span id="syncText">已连接云端</span>
     <button class="btn-sm" style="margin-left:auto;background:#4a90d9;color:#fff;" onclick="pullCloud()">⬇️ 拉取</button>
     <button class="btn-sm" style="background:#27ae60;color:#fff;" onclick="pushCloud()">⬆️ 保存</button>
   </div>
@@ -149,139 +103,64 @@ tr:hover { background: #f8f9fa; }
     <div class="item"><div class="label">总支出</div><div class="value red" id="sumExpense">0</div></div>
     <div class="item"><div class="label">总盈利</div><div class="value blue" id="sumProfit">0</div></div>
   </div>
-  <div class="card">
-    <h3>记一笔</h3>
-    <label>日期</label>
-    <input type="date" id="fDate">
-    <label>店铺</label>
-    <select id="fShop"><option value="">— 选择店铺 —</option></select>
-    <label>执行人</label>
-    <select id="fExec"><option value="">— 选择执行人 —</option></select>
-    <label>类型</label>
-    <select id="fType"><option value="收入">收入</option><option value="支出">支出</option></select>
-    <label>金额</label>
-    <input type="number" id="fAmount" placeholder="0" inputmode="decimal">
-    <div class="quick-amt">
-      <button onclick="addAmt(10)">+10</button><button onclick="addAmt(20)">+20</button><button onclick="addAmt(50)">+50</button><button onclick="addAmt(100)">+100</button><button onclick="addAmt(200)">+200</button><button onclick="addAmt(500)">+500</button><button onclick="addAmt(1000)">+1000</button><button onclick="addAmt(2000)">+2000</button>
-    </div>
-    <label>备注</label>
-    <input type="text" id="fNote" placeholder="备注">
+  <div class="card"><h3>记一笔</h3>
+    <label>日期</label><input type="date" id="fDate">
+    <label>店铺</label><select id="fShop"><option value="">— 选择店铺 —</option></select>
+    <label>执行人</label><select id="fExec"><option value="">— 选择执行人 —</option></select>
+    <label>类型</label><select id="fType"><option value="收入">收入</option><option value="支出">支出</option></select>
+    <label>金额</label><input type="number" id="fAmount" placeholder="0" inputmode="decimal">
+    <div class="quick-amt"><button onclick="addAmt(10)">+10</button><button onclick="addAmt(20)">+20</button><button onclick="addAmt(50)">+50</button><button onclick="addAmt(100)">+100</button><button onclick="addAmt(200)">+200</button><button onclick="addAmt(500)">+500</button><button onclick="addAmt(1000)">+1000</button><button onclick="addAmt(2000)">+2000</button></div>
+    <label>备注</label><input type="text" id="fNote" placeholder="备注">
     <button class="btn" onclick="addFlow()">记一笔</button>
   </div>
-  <div class="card">
-    <h3>流水明细 <button class="btn-sm btn-del" onclick="clearFlow()">清空</button></h3>
-    <label>筛选店铺</label>
-    <select id="fShopFilter" onchange="renderFlow()"><option value="">全部</option></select>
-    <label>筛选执行人</label>
-    <select id="fFilter" onchange="renderFlow()"><option value="">全部</option></select>
+  <div class="card"><h3>流水明细 <button class="btn-sm btn-del" onclick="clearFlow()">清空</button></h3>
+    <label>筛选店铺</label><select id="fShopFilter" onchange="renderFlow()"><option value="">全部</option></select>
+    <label>筛选执行人</label><select id="fFilter" onchange="renderFlow()"><option value="">全部</option></select>
     <div style="overflow-x:auto;"><table id="flowTable"><thead><tr><th>日期</th><th>店铺</th><th>执行人</th><th>类型</th><th>金额</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
   </div>
 </div>
 
-<!-- 每日汇总页 -->
 <div id="daily" class="page">
-  <div class="card">
-    <h3>每日汇总</h3>
-    <div style="overflow-x:auto;"><table id="dailyTable"><thead><tr><th>日期</th><th>收入</th><th>支出</th><th>盈利</th><th>分红总额</th></tr></thead><tbody></tbody></table></div>
-  </div>
-  <div class="card">
-    <h3>🏪 按店汇总</h3>
-    <div id="shopSummary"></div>
-  </div>
+  <div class="card"><h3>每日汇总</h3><div style="overflow-x:auto;"><table id="dailyTable"><thead><tr><th>日期</th><th>收入</th><th>支出</th><th>盈利</th><th>分红总额</th></tr></thead><tbody></tbody></table></div></div>
+  <div class="card"><h3>🏪 按店汇总</h3><div id="shopSummary"></div></div>
 </div>
-
-<!-- 分红明细页 -->
-<div id="dividend" class="page">
-  <div class="card">
-    <h3>分红明细</h3>
-    <div style="overflow-x:auto;"><table id="divTable"><thead><tr><th>日期</th><th>盈利</th><th>成员</th><th>比例</th><th>应得分红</th></tr></thead><tbody></tbody></table></div>
-  </div>
-</div>
-
-<!-- 成员页 -->
+<div id="dividend" class="page"><div class="card"><h3>分红明细</h3><div style="overflow-x:auto;"><table id="divTable"><thead><tr><th>日期</th><th>盈利</th><th>成员</th><th>比例</th><th>应得分红</th></tr></thead><tbody></tbody></table></div></div></div>
 <div id="members" class="page">
-  <div class="card">
-    <h3>添加成员</h3>
-    <label>姓名</label><input type="text" id="mName" placeholder="姓名">
-    <label>分红比例(%)</label><input type="number" id="mRate" placeholder="如 40">
-    <button class="btn" onclick="addMember()">添加</button>
-  </div>
-  <div class="card">
-    <h3>成员列表</h3>
-    <div id="memberList"></div>
-  </div>
+  <div class="card"><h3>添加成员</h3><label>姓名</label><input type="text" id="mName" placeholder="姓名"><label>分红比例(%)</label><input type="number" id="mRate" placeholder="如 40"><button class="btn" onclick="addMember()">添加</button></div>
+  <div class="card"><h3>成员列表</h3><div id="memberList"></div></div>
 </div>
-
-<!-- 店铺页 -->
 <div id="shops" class="page">
-  <div class="card">
-    <h3>添加店铺</h3>
-    <label>店铺名</label><input type="text" id="sName" placeholder="如 店A / 店B / 公共">
-    <button class="btn" onclick="addShop()">添加</button>
-  </div>
-  <div class="card">
-    <h3>店铺列表</h3>
-    <div id="shopList"></div>
-  </div>
+  <div class="card"><h3>添加店铺</h3><label>店铺名</label><input type="text" id="sName" placeholder="如 店A / 店B / 公共"><button class="btn" onclick="addShop()">添加</button></div>
+  <div class="card"><h3>店铺列表</h3><div id="shopList"></div></div>
 </div>
-
-<!-- 对账页 -->
 <div id="settle" class="page">
   <div class="summary" style="margin-bottom:15px;">
     <div class="item"><div class="label">总应分红</div><div class="value blue" id="settleTotal">0</div></div>
     <div class="item"><div class="label">已发放</div><div class="value green" id="settlePaid">0</div></div>
     <div class="item"><div class="label">未结清</div><div class="value red" id="settleDue">0</div></div>
   </div>
-  <div class="card">
-    <h3>每人结算 <button class="btn btn-green" onclick="openPayModal()">+ 登记发放</button></h3>
-    <div id="settleList"></div>
-  </div>
-  <div class="card">
-    <h3>发放记录</h3>
-    <div style="overflow-x:auto;"><table id="payTable"><thead><tr><th>日期</th><th>成员</th><th>金额</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div>
-  </div>
+  <div class="card"><h3>每人结算 <button class="btn btn-green" onclick="openPayModal()">+ 登记发放</button></h3><div id="settleList"></div></div>
+  <div class="card"><h3>发放记录</h3><div style="overflow-x:auto;"><table id="payTable"><thead><tr><th>日期</th><th>成员</th><th>金额</th><th>备注</th><th>操作</th></tr></thead><tbody></tbody></table></div></div>
 </div>
-
-<!-- 设置页 -->
 <div id="settings" class="page">
-  <div class="card">
-    <h3>☁️ 云端同步</h3>
-    <p style="font-size:13px;color:#27ae60;margin-bottom:10px;">✅ 已连接云端，数据自动保存</p>
-    <label>Gist ID</label><input type="text" id="cfgGist" placeholder="Gist ID">
-    <label>GitHub Token</label><input type="password" id="cfgToken" placeholder="ghp_ 开头">
+  <div class="card"><h3>☁️ 云端同步（Gitee）</h3>
+    <p style="font-size:13px;color:#27ae60;margin-bottom:10px;">✅ 已连接，数据自动保存</p>
+    <label>Gitee 用户名</label><input type="text" id="cfgOwner"><label>仓库名</label><input type="text" id="cfgRepo"><label>私人令牌</label><input type="password" id="cfgToken">
     <button class="btn" onclick="saveConfig()">更新配置</button>
     <button class="btn btn-green" onclick="testCloud()">测试连接</button>
-    <button class="btn btn-orange" onclick="pullCloud()">⬇️ 手动拉取</button>
-    <button class="btn btn-green" onclick="pushCloud()">⬆️ 手动保存</button>
+    <button class="btn btn-orange" onclick="pullCloud()">⬇️ 拉取</button><button class="btn btn-green" onclick="pushCloud()">⬆️ 保存</button>
   </div>
-  <div class="card">
-    <h3>📦 数据管理</h3>
+  <div class="card"><h3>📦 数据管理</h3>
     <button class="btn btn-green" onclick="exportExcel()">📥 导出 Excel</button>
-    <label style="margin-top:10px;">导入 Excel</label>
-    <input type="file" id="importFile" accept=".xlsx,.xls" onchange="importExcel()">
-    <hr style="margin:15px 0;">
-    <button class="btn btn-red" onclick="clearAll()">🗑️ 清空全部数据</button>
-    <button class="btn btn-orange" onclick="logout()">🚪 退出登录</button>
+    <label style="margin-top:10px;">导入 Excel</label><input type="file" id="importFile" accept=".xlsx,.xls" onchange="importExcel()">
+    <hr style="margin:15px 0;"><button class="btn btn-red" onclick="clearAll()">🗑️ 清空全部数据</button><button class="btn btn-orange" onclick="logout()">🚪 退出登录</button>
   </div>
 </div>
 
-<!-- 发放登记弹窗 -->
-<div class="modal-mask" id="payModal">
-  <div class="modal">
-    <h3>登记发放</h3>
-    <label><input type="checkbox" id="payAll" onchange="fillAllDue()"> 全选未结清成员</label>
-    <div id="payMemberList"></div>
-    <label>发放日期</label>
-    <input type="date" id="payDate">
-    <label>备注</label>
-    <input type="text" id="payNote" placeholder="如 现金已付">
-    <button class="btn btn-green" onclick="savePay()">确认发放</button>
-    <button class="btn" onclick="closePayModal()">取消</button>
-  </div>
-</div>
+<div class="modal-mask" id="payModal"><div class="modal"><h3>登记发放</h3><label><input type="checkbox" id="payAll" onchange="fillAllDue()"> 全选未结清成员</label><div id="payMemberList"></div><label>发放日期</label><input type="date" id="payDate"><label>备注</label><input type="text" id="payNote" placeholder="如 现金已付"><button class="btn btn-green" onclick="savePay()">确认发放</button><button class="btn" onclick="closePayModal()">取消</button></div></div>
 
 <script>
-/* ================= 锁屏 ================= */
+/* 锁屏 */
 (function(){
   const LP='fh_pwd', LH='fh_hint', LU='fh_unlocked';
   const screen=document.getElementById('lockScreen'), input=document.getElementById('lockInput'),
@@ -290,292 +169,148 @@ tr:hover { background: #f8f9fa; }
   let mode='login';
   if(!localStorage.getItem(LP)){ mode='set'; title.textContent='🔐 首次使用，请设置密码'; input.placeholder='设新密码（≥4位）'; hintIn.style.display='block'; hintIn.placeholder='设找回口令（随便一句）'; }
   else if(localStorage.getItem(LU)==='1'){ screen.style.display='none'; }
-  flink.onclick=(e)=>{ e.preventDefault(); mode='reset'; title.textContent='🔑 找回密码'; input.style.display='none'; hintIn.style.display='block'; hintIn.value=''; hintIn.placeholder='请输入找回口令'; btn.textContent='验证'; };
-  btn.onclick=()=>{
-    const p=input.value.trim(), h=hintIn.value.trim();
+  flink.onclick=e=>{ e.preventDefault(); mode='reset'; title.textContent='🔑 找回密码'; input.style.display='none'; hintIn.style.display='block'; hintIn.value=''; hintIn.placeholder='请输入找回口令'; btn.textContent='验证'; };
+  btn.onclick=()=>{ const p=input.value.trim(), h=hintIn.value.trim();
     if(mode==='set'){ if(p.length<4){toast('密码至少4位');return;} localStorage.setItem(LP,p); localStorage.setItem(LH,h); localStorage.setItem(LU,'1'); screen.style.display='none'; toast('密码设置成功！'); }
     else if(mode==='login'){ if(p===localStorage.getItem(LP)){ localStorage.setItem(LU,'1'); screen.style.display='none'; init(); } else toast('密码错误'); }
-    else if(mode==='reset'){ if(h===localStorage.getItem(LH)){ mode='set'; title.textContent='🔐 重设密码'; input.style.display='block'; input.value=''; input.placeholder='输入新密码'; hintIn.style.display='none'; btn.textContent='确认'; toast('口令正确，请设新密码'); } else toast('找回口令不对'); }
-  };
+    else if(mode==='reset'){ if(h===localStorage.getItem(LH)){ mode='set'; title.textContent='🔐 重设密码'; input.style.display='block'; input.value=''; input.placeholder='输入新密码'; hintIn.style.display='none'; btn.textContent='确认'; toast('口令正确，请设新密码'); } else toast('找回口令不对'); } };
 })();
 function logout(){ localStorage.removeItem('fh_unlocked'); location.reload(); }
-
-/* ================= 工具 ================= */
-function toast(msg){ const t=document.getElementById('toast'); t.textContent=msg; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
+function toast(m){ const t=document.getElementById('toast'); t.textContent=m; t.classList.add('show'); setTimeout(()=>t.classList.remove('show'),2500); }
 function $(id){ return document.getElementById(id); }
 function todayStr(){ return new Date().toISOString().slice(0,10); }
 
-/* ================= 云端配置 ================= */
-function getCfg(){ return { gist: localStorage.getItem('fh_gist')||'', token: localStorage.getItem('fh_token')||'' }; }
-function saveConfig(){ localStorage.setItem('fh_gist', $('cfgGist').value.trim()); localStorage.setItem('fh_token', $('cfgToken').value.trim()); toast('配置已更新'); }
-
-/* ================= 首次配置 ================= */
-(function(){
-  const cfg=getCfg();
-  if(!cfg.gist || !cfg.token){
-    document.getElementById('setupOverlay').style.display='flex';
-    document.getElementById('mainNav').style.display='none';
-  } else {
-    document.getElementById('setupOverlay').style.display='none';
-    document.getElementById('mainNav').style.display='flex';
-  }
-})();
+/* Gitee 配置 */
+function cfg(){ return { owner:localStorage.getItem('fh_owner')||'', repo:localStorage.getItem('fh_repo')||'', token:localStorage.getItem('fh_token')||'' }; }
+function saveConfig(){ localStorage.setItem('fh_owner',$('cfgOwner').value.trim()); localStorage.setItem('fh_repo',$('cfgRepo').value.trim()); localStorage.setItem('fh_token',$('cfgToken').value.trim()); toast('配置已更新'); }
+(function(){ const c=cfg(); if(c.owner&&c.repo&&c.token){ $('setupOverlay').style.display='none'; $('mainNav').style.display='flex'; init(); } })();
 async function finishSetup(){
-  const gist=$('setupGist').value.trim(), token=$('setupToken').value.trim();
-  if(!gist||!token){ toast('两项都要填'); return; }
-  localStorage.setItem('fh_gist',gist); localStorage.setItem('fh_token',token);
-  $('cfgGist').value=gist; $('cfgToken').value=token;
-  try{
-    await pullCloud(true);
-    document.getElementById('setupOverlay').style.display='none';
-    document.getElementById('mainNav').style.display='flex';
-    toast('连接成功！数据已加载');
-  }catch(e){ toast('连接失败：'+e.message); }
+  const o=$('setupOwner').value.trim(), r=$('setupRepo').value.trim(), t=$('setupToken').value.trim();
+  if(!o||!r||!t){ toast('三项都要填'); return; }
+  localStorage.setItem('fh_owner',o); localStorage.setItem('fh_repo',r); localStorage.setItem('fh_token',t);
+  try{ await pullCloud(true); $('setupOverlay').style.display='none'; $('mainNav').style.display='flex'; toast('连接成功！'); init(); }
+  catch(e){ toast('连接失败：'+e.message); }
 }
 
-/* ================= 数据（内存，不存localStorage） ================= */
+/* 数据 */
 let flows=[], members=[], shops=[], payments=[];
+let fileSha=null;
 
-/* ================= 云端读写 ================= */
-let gistFile = null;
-async function gistReq(path, method, body){
-  const cfg=getCfg();
-  if(!cfg.gist||!cfg.token) throw new Error('请先配置 Gist ID 和 Token');
-  const headers={ 'Authorization':'Bearer '+cfg.token, 'Accept':'application/vnd.github+json', 'Content-Type':'application/json' };
-  const res = await fetch('https://api.github.com/gists/'+cfg.gist+path, { method, headers, body: body?JSON.stringify(body):undefined });
-  if(!res.ok){ const t=await res.text(); throw new Error('云端返回 '+res.status+'：'+(t.slice(0,120)||res.statusText)); }
+/* Gitee API */
+async function giteeReq(path,method,body){
+  const c=cfg(); if(!c.owner||!c.repo||!c.token) throw new Error('请先配置 Gitee 用户名、仓库名和 Token');
+  const url='https://gitee.com/api/v5/repos/'+c.owner+'/'+c.repo+'/contents/'+path+'?access_token='+c.token;
+  const res=await fetch(url,{ method, headers:{'Content-Type':'application/json'}, body:body?JSON.stringify(body):undefined });
+  if(!res.ok){ const txt=await res.text(); throw new Error('Gitee返回'+res.status+'：'+(txt.slice(0,120)||res.statusText)); }
   return res.json();
 }
+function b64(s){ return btoa(unescape(encodeURIComponent(s))); }
+function unb64(s){ return decodeURIComponent(escape(atob(s.replace(/\n/g,'')))); }
 async function pullCloud(silent){
-  try{
-    setSyncStatus('saving','拉取中...');
-    const data = await gistReq('', 'GET');
-    const files = data.files||{};
-    const fname = Object.keys(files)[0];
-    if(!fname) throw new Error('该 Gist 里没有文件');
-    gistFile = fname;
-    const json = JSON.parse(files[fname].content||'{}');
-    flows = (json.flows||[]).map(f=>f.id?f:{...f,id:Date.now()+Math.random()});
-    members = (json.members||[]).map(m=>m.id?m:{...m,id:Date.now()+Math.random()});
-    shops = (json.shops||[])||[];
-    payments = (json.payments||[]).map(p=>p.id?p:{...p,id:Date.now()+Math.random()});
-    renderAll(); setSyncStatus(true,'已同步 · '+todayStr());
-    if(!silent) toast('云端数据已拉取');
-  }catch(e){ setSyncStatus(false,'拉取失败'); if(!silent) toast(e.message); throw e; }
+  try{ setSync('saving','拉取中...'); const d=await giteeReq('ledger.json','GET'); fileSha=d.sha;
+    const j=JSON.parse(unb64(d.content));
+    flows=(j.flows||[]).map(f=>f.id?f:{...f,id:Date.now()+Math.random()});
+    members=(j.members||[]).map(m=>m.id?m:{...m,id:Date.now()+Math.random()});
+    shops=(j.shops||[])||[];
+    payments=(j.payments||[]).map(p=>p.id?p:{...p,id:Date.now()+Math.random()});
+    renderAll(); setSync(true,'已同步 · '+todayStr()); if(!silent) toast('云端数据已拉取');
+  }catch(e){ setSync(false,'拉取失败'); if(!silent) toast(e.message); throw e; }
 }
 async function pushCloud(silent){
-  try{
-    setSyncStatus('saving','保存中...');
-    if(!gistFile){ const d=await gistReq('','GET'); gistFile=Object.keys(d.files||{})[0]; }
-    if(!gistFile){ gistFile='ledger.json'; }
-    const content = JSON.stringify({flows,members,shops,payments}, null, 1);
-    await gistReq('', 'PATCH', { files: { [gistFile]: { content } } });
-    setSyncStatus(true,'已同步 · '+todayStr());
-    if(!silent) toast('✅ 已保存到云端');
-  }catch(e){ setSyncStatus(false,'保存失败'); if(!silent) toast(e.message); throw e; }
+  try{ setSync('saving','保存中...');
+    const content=b64(JSON.stringify({flows,members,shops,payments},null,1));
+    if(!fileSha){ try{ const d=await giteeReq('ledger.json','GET'); fileSha=d.sha; }catch(e){ fileSha=null; } }
+    const body={ content, message:'记账更新 '+todayStr() }; if(fileSha) body.sha=fileSha;
+    await giteeReq('ledger.json','POST',body);
+    setSync(true,'已同步 · '+todayStr()); if(!silent) toast('✅ 已保存到云端');
+  }catch(e){ setSync(false,'保存失败'); if(!silent) toast(e.message); throw e; }
 }
-async function testCloud(){
-  try{ const d=await gistReq('','GET'); setSyncStatus(true,'连接成功'); toast('连接成功：'+((d.files&&Object.keys(d.files)[0])||'无文件')); }
-  catch(e){ setSyncStatus(false,'连接失败'); toast(e.message); }
-}
-function setSyncStatus(state, msg){
-  const dot=$('syncDot'), text=$('syncText');
-  dot.className='dot '+(state==='saving'?'saving':state?'on':'off');
-  text.textContent=msg||(state?'已连接云端':'未连接云端');
-}
+async function testCloud(){ try{ await giteeReq('ledger.json','GET'); setSync(true,'连接成功'); toast('连接成功'); }catch(e){ setSync(false,'连接失败'); toast(e.message); } }
+function setSync(state,msg){ const dot=$('syncDot'),text=$('syncText'); dot.className='dot '+(state==='saving'?'saving':state?'on':'off'); text.textContent=msg||(state?'已连接云端':'未连接云端'); }
 
-/* ================= 页面 ================= */
-function init(){ $('fDate').value=todayStr(); $('payDate').value=todayStr();
-  $('cfgGist').value=getCfg().gist; $('cfgToken').value=getCfg().token;
-  renderAll();
-}
+/* 页面 */
+function init(){ $('fDate').value=todayStr(); $('payDate').value=todayStr(); const c=cfg(); $('cfgOwner').value=c.owner; $('cfgRepo').value=c.repo; $('cfgToken').value=c.token; renderAll(); }
 function renderAll(){ renderFlow(); renderDaily(); renderDividend(); renderMembers(); renderShops(); renderSettle(); refreshSelects(); }
-
 function refreshSelects(){
-  ['fShop','fShopFilter'].forEach(id=>{
-    const el=$(id); if(!el) return; const cur=el.value;
-    el.innerHTML = id==='fShopFilter' ? '<option value="">全部</option>' : '<option value="">— 选择店铺 —</option>';
-    shops.forEach(s=>{ const o=document.createElement('option'); o.value=s; o.textContent=s; el.appendChild(o); });
-    el.value=cur;
-  });
-  const mopts = members.map(m=>m.name);
-  ['fExec','fFilter'].forEach(id=>{
-    const el=$(id); if(!el) return; const cur=el.value;
-    el.innerHTML = id==='fFilter' ? '<option value="">全部</option>' : '<option value="">— 选择执行人 —</option>';
-    mopts.forEach(n=>{ const o=document.createElement('option'); o.value=n; o.textContent=n; el.appendChild(o); });
-    el.value=cur;
-  });
+  ['fShop','fShopFilter'].forEach(id=>{ const el=$(id); if(!el)return; const cur=el.value; el.innerHTML=id==='fShopFilter'?'<option value="">全部</option>':'<option value="">— 选择店铺 —</option>'; shops.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;el.appendChild(o);}); el.value=cur; });
+  ['fExec','fFilter'].forEach(id=>{ const el=$(id); if(!el)return; const cur=el.value; el.innerHTML=id==='fFilter'?'<option value="">全部</option>':'<option value="">— 选择执行人 —</option>'; members.forEach(m=>{const o=document.createElement('option');o.value=m.name;o.textContent=m.name;el.appendChild(o);}); el.value=cur; });
 }
+function showPage(id,btn){ document.querySelectorAll('.page').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active')); $(id).classList.add('active'); if(btn)btn.classList.add('active'); if(id==='settle')renderSettle(); }
 
-function showPage(id, btn){
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
-  $(id).classList.add('active'); if(btn) btn.classList.add('active');
-  if(id==='settle') renderSettle();
-}
-
-/* ================= 流水 ================= */
+/* 流水 */
 function addAmt(v){ const el=$('fAmount'); el.value=(parseFloat(el.value)||0)+v; }
-function addFlow(){
-  const date=$('fDate').value, shop=$('fShop').value, exec=$('fExec').value, type=$('fType').value,
-        amount=parseFloat($('fAmount').value), note=$('fNote').value.trim();
+function addFlow(){ const date=$('fDate').value, shop=$('fShop').value, exec=$('fExec').value, type=$('fType').value, amount=parseFloat($('fAmount').value), note=$('fNote').value.trim();
   if(!date||!shop||!exec||!amount||amount<=0){ toast('请填日期、店铺、执行人和金额'); return; }
-  flows.push({date,shop,exec,type,amount,note,id:Date.now()});
-  $('fAmount').value=''; $('fNote').value='';
-  renderFlow(); renderDaily(); renderDividend(); renderSettle();
-  pushCloud(); // 自动保存云端
-}
+  flows.push({date,shop,exec,type,amount,note,id:Date.now()}); $('fAmount').value=''; $('fNote').value=''; renderFlow(); renderDaily(); renderDividend(); renderSettle(); pushCloud(); }
 function delFlow(id){ flows=flows.filter(f=>f.id!==id); renderFlow(); renderDaily(); renderDividend(); renderSettle(); pushCloud(); }
-function renderFlow(){
-  let inc=0,exp=0;
-  const sf=$('fShopFilter').value, f=$('fFilter').value;
-  const tb=$('flowTable').querySelector('tbody'); tb.innerHTML='';
-  [...flows].reverse().forEach(x=>{
-    if(x.type==='收入') inc+=x.amount; else exp+=x.amount;
-    if(sf && x.shop!==sf) return;
-    if(f && x.exec!==f) return;
-    tb.innerHTML+=`<tr><td>${x.date}</td><td><span class="badge badge-purple">${x.shop||'-'}</span></td><td><span class="badge badge-blue">${x.exec||'-'}</span></td><td><span class="badge ${x.type==='收入'?'badge-green':'badge-red'}">${x.type}</span></td><td>${x.amount.toFixed(2)}</td><td>${x.note||''}</td><td><button class="btn-sm btn-del" onclick="delFlow(${x.id})">删</button></td></tr>`;
-  });
-  $('sumIncome').textContent=inc.toFixed(2); $('sumExpense').textContent=exp.toFixed(2); $('sumProfit').textContent=(inc-exp).toFixed(2);
-}
+function renderFlow(){ let inc=0,exp=0; const sf=$('fShopFilter').value, f=$('fFilter').value; const tb=$('flowTable').querySelector('tbody'); tb.innerHTML='';
+  [...flows].reverse().forEach(x=>{ if(x.type==='收入')inc+=x.amount; else exp+=x.amount; if(sf&&x.shop!==sf)return; if(f&&x.exec!==f)return;
+    tb.innerHTML+=`<tr><td>${x.date}</td><td><span class="badge badge-purple">${x.shop||'-'}</span></td><td><span class="badge badge-blue">${x.exec||'-'}</span></td><td><span class="badge ${x.type==='收入'?'badge-green':'badge-red'}">${x.type}</span></td><td>${x.amount.toFixed(2)}</td><td>${x.note||''}</td><td><button class="btn-sm btn-del" onclick="delFlow(${x.id})">删</button></td></tr>`; });
+  $('sumIncome').textContent=inc.toFixed(2); $('sumExpense').textContent=exp.toFixed(2); $('sumProfit').textContent=(inc-exp).toFixed(2); }
 
-/* ================= 每日汇总 ================= */
-function dayProfit(){
-  const d={};
-  flows.forEach(f=>{ if(!d[f.date]) d[f.date]={inc:0,exp:0}; if(f.type==='收入') d[f.date].inc+=f.amount; else d[f.date].exp+=f.amount; });
-  const r={}; Object.keys(d).forEach(k=>{ r[k]=d[k].inc-d[k].exp>0?d[k].inc-d[k].exp:0; }); return r;
-}
-function renderDaily(){
-  const dp=dayProfit(), tb=$('dailyTable').querySelector('tbody'); tb.innerHTML='';
-  const days=Object.keys(dp).sort().reverse();
+/* 每日/按店 */
+function dayProfit(){ const d={}; flows.forEach(f=>{ if(!d[f.date])d[f.date]={inc:0,exp:0}; if(f.type==='收入')d[f.date].inc+=f.amount; else d[f.date].exp+=f.amount; }); const r={}; Object.keys(d).forEach(k=>{r[k]=d[k].inc-d[k].exp>0?d[k].inc-d[k].exp:0;}); return r; }
+function renderDaily(){ const dp=dayProfit(), tb=$('dailyTable').querySelector('tbody'); tb.innerHTML=''; const days=Object.keys(dp).sort().reverse();
   if(!days.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#999;">暂无数据</td></tr>'; }
   days.forEach(d=>{ const p=flows.filter(f=>f.date===d&&f.type==='收入').reduce((s,f)=>s+f.amount,0)-flows.filter(f=>f.date===d&&f.type==='支出').reduce((s,f)=>s+f.amount,0);
     tb.innerHTML+=`<tr><td>${d}</td><td class="green">${flows.filter(f=>f.date===d&&f.type==='收入').reduce((s,f)=>s+f.amount,0).toFixed(2)}</td><td class="red">${flows.filter(f=>f.date===d&&f.type==='支出').reduce((s,f)=>s+f.amount,0).toFixed(2)}</td><td class="${p>=0?'green':'red'}">${p.toFixed(2)}</td><td class="blue">${p>0?p.toFixed(2):'-'}</td></tr>`; });
+  const ss={}; shops.forEach(s=>{ss[s]={inc:0,exp:0};}); flows.forEach(f=>{ if(!ss[f.shop])ss[f.shop]={inc:0,exp:0}; if(f.type==='收入')ss[f.shop].inc+=f.amount; else ss[f.shop].exp+=f.amount; });
+  const sl=$('shopSummary'); sl.innerHTML=''; Object.keys(ss).forEach(s=>{ const p=ss[s].inc-ss[s].exp; sl.innerHTML+=`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #eee;"><span style="flex:1;"><b>${s}</b></span><span class="green" style="margin-right:10px;">收 ${ss[s].inc.toFixed(2)}</span><span class="red" style="margin-right:10px;">支 ${ss[s].exp.toFixed(2)}</span><span class="${p>=0?'green':'red'}"><b>盈 ${p.toFixed(2)}</b></span></div>`; });
+  if(!Object.keys(ss).length) sl.innerHTML='<p style="color:#999;">暂无店铺数据</p>'; }
 
-  // 按店汇总
-  const ss={}; shops.forEach(s=>{ ss[s]={inc:0,exp:0}; });
-  flows.forEach(f=>{ if(!ss[f.shop]) ss[f.shop]={inc:0,exp:0}; if(f.type==='收入') ss[f.shop].inc+=f.amount; else ss[f.shop].exp+=f.amount; });
-  const sl=$('shopSummary'); sl.innerHTML='';
-  Object.keys(ss).forEach(s=>{
-    const p=ss[s].inc-ss[s].exp;
-    sl.innerHTML+=`<div style="display:flex;align-items:center;padding:8px 0;border-bottom:1px solid #eee;"><span style="flex:1;"><b>${s}</b></span><span class="green" style="margin-right:10px;">收 ${ss[s].inc.toFixed(2)}</span><span class="red" style="margin-right:10px;">支 ${ss[s].exp.toFixed(2)}</span><span class="${p>=0?'green':'red'}"><b>盈 ${p.toFixed(2)}</b></span></div>`;
-  });
-  if(!Object.keys(ss).length) sl.innerHTML='<p style="color:#999;">暂无店铺数据</p>';
-}
-
-/* ================= 分红 ================= */
-function renderDividend(){
-  const dp=dayProfit(), tb=$('divTable').querySelector('tbody'); tb.innerHTML='';
-  const days=Object.keys(dp).sort().reverse();
+/* 分红 */
+function renderDividend(){ const dp=dayProfit(), tb=$('divTable').querySelector('tbody'); tb.innerHTML=''; const days=Object.keys(dp).sort().reverse();
   if(!days.length){ tb.innerHTML='<tr><td colspan="5" style="text-align:center;color:#999;">暂无数据</td></tr>'; }
-  days.forEach(d=>{ const p=dp[d];
-    if(p<=0){ tb.innerHTML+=`<tr><td>${d}</td><td>0</td><td colspan="3" style="color:#999;">无盈利，不分</td></tr>`; return; }
-    members.forEach(m=>{ tb.innerHTML+=`<tr><td>${d}</td><td>${p.toFixed(2)}</td><td>${m.name}</td><td>${m.rate}%</td><td class="blue">${(p*m.rate/100).toFixed(2)}</td></tr>`; });
-  });
-}
+  days.forEach(d=>{ const p=dp[d]; if(p<=0){ tb.innerHTML+=`<tr><td>${d}</td><td>0</td><td colspan="3" style="color:#999;">无盈利，不分</td></tr>`; return; } members.forEach(m=>{ tb.innerHTML+=`<tr><td>${d}</td><td>${p.toFixed(2)}</td><td>${m.name}</td><td>${m.rate}%</td><td class="blue">${(p*m.rate/100).toFixed(2)}</td></tr>`; }); }); }
 
-/* ================= 成员 ================= */
-function addMember(){
-  const name=$('mName').value.trim(), rate=parseFloat($('mRate').value);
-  if(!name||!rate){ toast('填姓名和比例'); return; }
-  members.push({name,rate,id:Date.now()}); $('mName').value=''; $('mRate').value=''; renderMembers(); renderDividend(); renderSettle(); refreshSelects(); pushCloud();
-}
+/* 成员 */
+function addMember(){ const name=$('mName').value.trim(), rate=parseFloat($('mRate').value); if(!name||!rate){toast('填姓名和比例');return;} members.push({name,rate,id:Date.now()}); $('mName').value=''; $('mRate').value=''; renderMembers(); renderDividend(); renderSettle(); refreshSelects(); pushCloud(); }
 function delMember(id){ members=members.filter(m=>m.id!==id); renderMembers(); renderDividend(); renderSettle(); refreshSelects(); pushCloud(); }
-function renderMembers(){
-  const el=$('memberList'); el.innerHTML='';
-  if(!members.length){ el.innerHTML='<p style="color:#999;">暂无成员</p>'; return; }
-  members.forEach(m=>{ el.innerHTML+=`<div style="display:flex;align-items:center;padding:6px 0;"><span style="flex:1;">${m.name}（<b>${m.rate}%</b>）</span><button class="btn-sm btn-del" onclick="delMember(${m.id})">删</button></div>`; });
-}
+function renderMembers(){ const el=$('memberList'); el.innerHTML=''; if(!members.length){el.innerHTML='<p style="color:#999;">暂无成员</p>';return;} members.forEach(m=>{ el.innerHTML+=`<div style="display:flex;align-items:center;padding:6px 0;"><span style="flex:1;">${m.name}（<b>${m.rate}%</b>）</span><button class="btn-sm btn-del" onclick="delMember(${m.id})">删</button></div>`; }); }
 
-/* ================= 店铺 ================= */
-function addShop(){
-  const name=$('sName').value.trim();
-  if(!name){ toast('填店铺名'); return; }
-  if(shops.includes(name)){ toast('已存在'); return; }
-  shops.push(name); $('sName').value=''; renderShops(); refreshSelects(); pushCloud();
-}
+/* 店铺 */
+function addShop(){ const name=$('sName').value.trim(); if(!name){toast('填店铺名');return;} if(shops.includes(name)){toast('已存在');return;} shops.push(name); $('sName').value=''; renderShops(); refreshSelects(); pushCloud(); }
 function delShop(name){ shops=shops.filter(s=>s!==name); renderShops(); refreshSelects(); pushCloud(); }
-function renderShops(){
-  const el=$('shopList'); el.innerHTML='';
-  if(!shops.length){ el.innerHTML='<p style="color:#999;">暂无店铺，先添加</p>'; return; }
-  shops.forEach(s=>{ el.innerHTML+=`<div style="display:flex;align-items:center;padding:6px 0;"><span style="flex:1;">🏪 ${s}</span><button class="btn-sm btn-del" onclick="delShop('${s}')">删</button></div>`; });
-}
+function renderShops(){ const el=$('shopList'); el.innerHTML=''; if(!shops.length){el.innerHTML='<p style="color:#999;">暂无店铺，先添加</p>';return;} shops.forEach(s=>{ el.innerHTML+=`<div style="display:flex;align-items:center;padding:6px 0;"><span style="flex:1;">🏪 ${s}</span><button class="btn-sm btn-del" onclick="delShop('${s}')">删</button></div>`; }); }
 
-/* ================= 对账 ================= */
-function memberDue(){
-  const dp=dayProfit(), r={}; members.forEach(m=>{ r[m.name]=0; });
-  Object.values(dp).forEach(p=>{ if(p<=0)return; members.forEach(m=>{ r[m.name]+=p*m.rate/100; }); }); return r;
-}
-function renderSettle(){
-  const due=memberDue(); let totalDue=0,totalPaid=0;
-  members.forEach(m=>{ const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0); totalDue+=due[m.name]; totalPaid+=paid; });
-  $('settleTotal').textContent=totalDue.toFixed(2); $('settlePaid').textContent=totalPaid.toFixed(2); $('settleDue').textContent=(totalDue-totalPaid).toFixed(2);
-  const el=$('settleList'); el.innerHTML='';
-  members.forEach(m=>{
-    const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0), diff=due[m.name]-paid;
-    let badge='<span class="badge badge-green">已结清</span>';
-    if(diff>0.01) badge=`<span class="badge badge-red">还欠他 ${diff.toFixed(2)}</span>`;
-    else if(diff<-0.01) badge=`<span class="badge badge-orange">多发 ${(-diff).toFixed(2)}</span>`;
-    el.innerHTML+=`<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid #eee;"><span style="flex:1;"><b>${m.name}</b> 应${due[m.name].toFixed(2)} / 已领 ${paid.toFixed(2)}</span>${badge}</div>`;
-  });
-  const tb=$('payTable').querySelector('tbody'); tb.innerHTML='';
-  [...payments].reverse().forEach(p=>{ tb.innerHTML+=`<tr><td>${p.date}</td><td>${p.member}</td><td>${p.amount.toFixed(2)}</td><td>${p.note||''}</td><td><button class="btn-sm btn-del" onclick="delPay(${p.id})">删</button></td></tr>`; });
-}
-function openPayModal(){
-  const due=memberDue(); const el=$('payMemberList'); el.innerHTML='';
-  members.forEach(m=>{
-    const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0), diff=due[m.name]-paid;
-    el.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;"><input type="checkbox" class="pay-cb" data-name="${m.name}" ${diff>0.01?'':'disabled'}><span style="flex:1;">${m.name}</span><input type="number" class="pay-amt" data-name="${m.name}" placeholder="${diff>0.01?'金额('+diff.toFixed(2)+')':'已结清'}" ${diff>0.01?'':'disabled'} style="width:100px;padding:6px;"></div>`;
-  });
-  $('payModal').classList.add('show');
-}
+/* 对账 */
+function memberDue(){ const dp=dayProfit(), r={}; members.forEach(m=>{r[m.name]=0;}); Object.values(dp).forEach(p=>{ if(p<=0)return; members.forEach(m=>{r[m.name]+=p*m.rate/100;}); }); return r; }
+function renderSettle(){ const due=memberDue(); let tD=0,tP=0; members.forEach(m=>{const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0); tD+=due[m.name]; tP+=paid;});
+  $('settleTotal').textContent=tD.toFixed(2); $('settlePaid').textContent=tP.toFixed(2); $('settleDue').textContent=(tD-tP).toFixed(2);
+  const el=$('settleList'); el.innerHTML=''; members.forEach(m=>{ const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0), diff=due[m.name]-paid;
+    let badge='<span class="badge badge-green">已结清</span>'; if(diff>0.01)badge=`<span class="badge badge-red">还欠他 ${diff.toFixed(2)}</span>`; else if(diff<-0.01)badge=`<span class="badge badge-orange">多发 ${(-diff).toFixed(2)}</span>`;
+    el.innerHTML+=`<div style="display:flex;align-items:center;padding:6px 0;border-bottom:1px solid #eee;"><span style="flex:1;"><b>${m.name}</b> 应${due[m.name].toFixed(2)} / 已领 ${paid.toFixed(2)}</span>${badge}</div>`; });
+  const tb=$('payTable').querySelector('tbody'); tb.innerHTML=''; [...payments].reverse().forEach(p=>{ tb.innerHTML+=`<tr><td>${p.date}</td><td>${p.member}</td><td>${p.amount.toFixed(2)}</td><td>${p.note||''}</td><td><button class="btn-sm btn-del" onclick="delPay(${p.id})">删</button></td></tr>`; }); }
+function openPayModal(){ const due=memberDue(); const el=$('payMemberList'); el.innerHTML=''; members.forEach(m=>{ const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0), diff=due[m.name]-paid;
+  el.innerHTML+=`<div style="display:flex;align-items:center;gap:8px;padding:6px 0;"><input type="checkbox" class="pay-cb" data-name="${m.name}" ${diff>0.01?'':'disabled'}><span style="flex:1;">${m.name}</span><input type="number" class="pay-amt" data-name="${m.name}" placeholder="${diff>0.01?'金额('+diff.toFixed(2)+')':'已结清'}" ${diff>0.01?'':'disabled'} style="width:100px;padding:6px;"></div>`; }); $('payModal').classList.add('show'); }
 function closePayModal(){ $('payModal').classList.remove('show'); }
-function fillAllDue(){ const c=$('payAll').checked; document.querySelectorAll('.pay-cb').forEach(x=>{ if(!x.disabled)x.checked=c; }); }
-function savePay(){
-  const date=$('payDate').value, note=$('payNote').value.trim();
-  if(!date){ toast('选日期'); return; } let n=0;
-  document.querySelectorAll('.pay-cb').forEach((cb,i)=>{
-    if(cb.checked){ const name=cb.dataset.name, amt=parseFloat(document.querySelectorAll('.pay-amt')[i].value);
-      if(!amt||amt<=0){ toast(name+' 金额不对'); return; }
-      payments.push({date,member:name,amount:amt,note,id:Date.now()}); n++; }
-  });
-  if(!n){ toast('没选任何人'); return; }
-  closePayModal(); renderSettle(); pushCloud();
-}
+function fillAllDue(){ const c=$('payAll').checked; document.querySelectorAll('.pay-cb').forEach(x=>{if(!x.disabled)x.checked=c;}); }
+function savePay(){ const date=$('payDate').value, note=$('payNote').value.trim(); if(!date){toast('选日期');return;} let n=0;
+  document.querySelectorAll('.pay-cb').forEach((cb,i)=>{ if(cb.checked){ const name=cb.dataset.name, amt=parseFloat(document.querySelectorAll('.pay-amt')[i].value); if(!amt||amt<=0){toast(name+' 金额不对');return;} payments.push({date,member:name,amount:amt,note,id:Date.now()}); n++; } });
+  if(!n){toast('没选任何人');return;} closePayModal(); renderSettle(); pushCloud(); }
 function delPay(id){ payments=payments.filter(p=>p.id!==id); renderSettle(); pushCloud(); }
 
-/* ================= Excel ================= */
-function exportExcel(){
-  const wb=XLSX.utils.book_new();
-  const dp=dayProfit();
+/* Excel */
+function exportExcel(){ const wb=XLSX.utils.book_new(); const dp=dayProfit();
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['日期','店铺','执行人','类型','金额','备注'],...flows.map(f=>[f.date,f.shop,f.exec,f.type,f.amount,f.note])]),'流水明细');
-  const dd=[['日期','收入','支出','盈利','分红总额']]; Object.keys(dp).sort().forEach(d=>{ const p=flows.filter(x=>x.date===d&&x.type==='收入').reduce((s,x)=>s+x.amount,0)-flows.filter(x=>x.date===d&&x.type==='支出').reduce((s,x)=>s+x.amount,0); dd.push([d, flows.filter(x=>x.date===d&&x.type==='收入').reduce((s,x)=>s+x.amount,0), flows.filter(x=>x.date===d&&x.type==='支出').reduce((s,x)=>s+x.amount,0), p, p>0?p:0]); });
+  const dd=[['日期','收入','支出','盈利','分红总额']]; Object.keys(dp).sort().forEach(d=>{const p=flows.filter(x=>x.date===d&&x.type==='收入').reduce((s,x)=>s+x.amount,0)-flows.filter(x=>x.date===d&&x.type==='支出').reduce((s,x)=>s+x.amount,0); dd.push([d, flows.filter(x=>x.date===d&&x.type==='收入').reduce((s,x)=>s+x.amount,0), flows.filter(x=>x.date===d&&x.type==='支出').reduce((s,x)=>s+x.amount,0), p, p>0?p:0]); });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dd),'每日汇总');
-  const dv=[['日期','盈利','成员','比例','应得分红']]; Object.keys(dp).sort().forEach(d=>{ const p=dp[d]; if(p>0)members.forEach(m=>dv.push([d,p,m.name,m.rate+'%',(p*m.rate/100).toFixed(2)])); });
+  const dv=[['日期','盈利','成员','比例','应得分红']]; Object.keys(dp).sort().forEach(d=>{const p=dp[d]; if(p>0)members.forEach(m=>dv.push([d,p,m.name,m.rate+'%',(p*m.rate/100).toFixed(2)])); });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(dv),'分红明细');
-  const due=memberDue(); const md=[['成员','比例','应得分红','已领','差额']]; members.forEach(m=>{ const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0); md.push([m.name,m.rate+'%',due[m.name].toFixed(2),paid.toFixed(2),(due[m.name]-paid).toFixed(2)]); });
+  const due=memberDue(); const md=[['成员','比例','应得分红','已领','差额']]; members.forEach(m=>{const paid=payments.filter(p=>p.member===m.name).reduce((s,p)=>s+p.amount,0); md.push([m.name,m.rate+'%',due[m.name].toFixed(2),paid.toFixed(2),(due[m.name]-paid).toFixed(2)]); });
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet(md),'成员分红');
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['日期','成员','金额','备注'],...payments.map(p=>[p.date,p.member,p.amount,p.note])]),'发放对账');
   const ti=flows.filter(x=>x.type==='收入').reduce((s,x)=>s+x.amount,0), te=flows.filter(x=>x.type==='支出').reduce((s,x)=>s+x.amount,0);
   XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([['项目','金额'],['总收入',ti],['总支出',te],['总盈利',ti-te],['总应分红',Object.values(due).reduce((a,b)=>a+b,0)],['累计已发',payments.reduce((s,p)=>s+p.amount,0)]]),'累计汇总');
-  XLSX.writeFile(wb,'分红记账_'+todayStr()+'.xlsx');
-}
-function importExcel(){
-  const file=$('importFile').files[0]; if(!file) return; const rd=new FileReader();
-  rd.onload=e=>{
-    const wb=XLSX.read(e.target.result,{type:'array'}); let added=0;
-    wb.SheetNames.forEach(s=>{
-      const data=XLSX.utils.sheet_to_json(wb.Sheets[s],{header:1});
-      if(s==='流水明细'||s==='流水') for(let i=1;i<data.length;i++){ const r=data[i]; if(!r[0]||!r[4])continue; if(flows.find(f=>f.date===r[0]&&f.type===r[3]&&f.amount==r[4]))continue; flows.push({date:r[0],shop:r[1]||'',exec:r[2]||'',type:r[3]||'支出',amount:parseFloat(r[4])||0,note:r[5]||'',id:Date.now()+i}); added++; }
-      if(s==='成员分红'||s==='成员') for(let i=1;i<data.length;i++){ const r=data[i]; if(!r[0])continue; if(members.find(m=>m.name===r[0]))continue; members.push({name:r[0],rate:parseFloat(r[1])||0,id:Date.now()+i}); added++; }
-      if(s==='发放对账'||s==='发放记录') for(let i=1;i<data.length;i++){ const r=data[i]; if(!r[0]||!r[1]||!r[2])continue; if(payments.find(p=>p.date===r[0]&&p.member===r[1]&&p.amount==r[2]))continue; payments.push({date:r[0],member:r[1],amount:parseFloat(r[2])||0,note:r[3]||'',id:Date.now()+i}); added++; }
-    });
-    renderAll(); pushCloud(); toast('导入完成，新增 '+added+' 条');
-  };
-  rd.readAsArrayBuffer(file);
-}
-function clearAll(){ if(confirm('确定清空所有数据？不可恢复！')){ flows=[];members=[];shops=[];payments=[];renderAll();pushCloud(); } }
-function clearFlow(){ if(confirm('清空所有流水？')){ flows=[];renderFlow();renderDaily();renderDividend();renderSettle();pushCloud(); } }
+  XLSX.writeFile(wb,'分红记账_'+todayStr()+'.xlsx'); }
+function importExcel(){ const file=$('importFile').files[0]; if(!file)return; const rd=new FileReader(); rd.onload=e=>{ const wb=XLSX.read(e.target.result,{type:'array'}); let added=0;
+  wb.SheetNames.forEach(s=>{ const data=XLSX.utils.sheet_to_json(wb.Sheets[s],{header:1});
+    if((s==='流水明细'||s==='流水')) for(let i=1;i<data.length;i++){ const r=data[i]; if(!r[0]||!r[4])continue; if(flows.find(f=>f.date===r[0]&&f.type===r[3]&&f.amount==r[4]))continue; flows.push({date:r[0],shop:r[1]||'',exec:r[2]||'',type:r[3]||'支出',amount:parseFloat(r[4])||0,note:r[5]||'',id:Date.now()+i}); added++; }
+    if((s==='成员分红'||s==='成员')) for(let i=1;i<data.length;i++){ const r=data[i]; if(!r[0])continue; if(members.find(m=>m.name===r[0]))continue; members.push({name:r[0],rate:parseFloat(r[1])||0,id:Date.now()+i}); added++; }
+    if((s==='发放对账'||s==='发放记录')) for(let i=1;i<data.length;i++){ const r=data[i]; if(!r[0]||!r[1]||!r[2])continue; if(payments.find(p=>p.date===r[0]&&p.member===r[1]&&p.amount==r[2]))continue; payments.push({date:r[0],member:r[1],amount:parseFloat(r[2])||0,note:r[3]||'',id:Date.now()+i}); added++; } });
+  renderAll(); pushCloud(); toast('导入完成，新增 '+added+' 条'); }; rd.readAsArrayBuffer(file); }
+function clearAll(){ if(confirm('确定清空所有数据？')){ flows=[];members=[];shops=[];payments=[];renderAll();pushCloud();} }
+function clearFlow(){ if(confirm('清空所有流水？')){ flows=[];renderFlow();renderDaily();renderDividend();renderSettle();pushCloud();} }
 </script>
 </body>
 </html>
